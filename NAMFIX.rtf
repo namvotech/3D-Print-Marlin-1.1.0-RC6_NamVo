@@ -1,0 +1,1161 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033\deflangfe1033{\fonttbl{\f0\fswiss\fprq2\fcharset0 Calibri;}{\f1\fswiss\fprq2\fcharset163 Calibri;}{\f2\fswiss\fprq2\fcharset238 Calibri CE;}{\f3\froman\fprq2\fcharset0 Times New Roman;}{\f4\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red255\green0\blue0;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\sa200\lang9\f0\fs22 2016.01.22-16.26 Ch\u7881?nh s\u7917?a hi\u7875?n th\u7883? XYZ AXIS\par
+2016.01.26-13.55 Galvo SPI v\u7899?i chip MCP4922 v\'e0 TL084 ok. (Ch\'fa \'fd: Galvo ch\u7881? ch\u7841?y \lang1066\f1\'f0\'fd\lang9\f0\u7907?c trong ph\u7841?m vi nh\u7887? l\'e0 20 mm, c\'e1i n\'e0y ch\u7881?nh trong cura khi xu\u7845?t Gcode)\par
+2016.01.26-15.22 Th\'eam ch\u7871?\f2  \'f0\f0\u7897? l\u7853?p tr\'ecnh, b\u7853?t t\u7855?t #define GALVO_SPI\par
+2016.01.26-15.55 Th\'eam ch\u7871?\f2  \'f0\f0\u7897? l\u7853?p tr\'ecnh, b\u7853?t t\u7855?t  //#define GALVO_LASER_I2C\par
+2016.01.28-12.56 S\u7917?a ENDSTOP - HOME, s\u7917?a l\u7895?i pin KILL_PIN\par
+2016.01.28-14.58 Chuy\u7875?n Galvo harware th\'e0nh software SPI => Galvo v\'e0 SDcard ch\u7841?y ok.\par
+2016.01.29-08.50 Ch\u7881?nh  #define GALVO_CLK_PIN\tab\tab 43\tab\tab\par
+\tab\tab\tab #define GALVO_DAT_PIN\tab\tab 42\par
+2016.02.01-08.45 S\u7917?a file G28,\line\tab\tab Che c\'e1c l\u7879?nh  \tab //    HOMEAXIS(X);  //NAMFIX\par
+\tab\tab\tab\tab //    HOMEAXIS(Y);  //NAMFIX\tab\par
+2016.02.04-09.33 Ch\u7881?nh s\u7917?a t\u7889?\f2 c \'f0\f0\u7897? Galvo, t\u7841?m ok\par
+\lang1066\f1 2016.02.04-15.45 Th\'eam code \'f0i\lang9\f0\u7873?u khi\u7875?n ngu\u7891?n cho Laser.\par
+\tab\tab M002: n\u7841?p gi\'e1 tr\u7883? cho laserPower\par
+\lang1066\f1\tab\tab M003: C\'e0i \'f0\lang9\f0\u7863?t ch\u7871?\f2  \'f0\f0\u7897? lu\'f4n b\u7853?t laser\par
+\lang1066\f1\tab\tab M004: C\'e0i \'f0\lang9\f0\u7863?t ch\u7871?\f2  \'f0\f0\u7897?: G0 => T\u7855?t laser, G1 => b\u7853?t laser (laser qu\'e9t nhanh n\'ean k \tab\tab\tab xu\u7845?t k\u7883?\f2 p \'f0i\f0\u7875?m \u7843?nh)\par
+2016.02.18-09.41 Ch\u7881?nh s\u7917?a trong G28 (Home X,Y)\par
+\f2 2016.02.23-16.45 \'d0\f0\u7897?ng c\lang1066\f1\'f5\lang9\f0  cho ph\u7847?n m\'e1y SLS (SLS_PRINTER)\par
+\pard\nowidctlpar 2016.02.24-16.45 SLS_PRINTER: Laser control\par
+2016.03.23-16.37 Ch\u7881?nh s\u7917?a l\u7841?i inline void refresh_cmd_timeout() \{ previous_cmd_ms = millis();\} C\u7911?a G4\par
+Miracles-2016.05.09-08.50: Ch\u7881?\f2 nh AXIS_STEPS_PER_UNIT_E = 125 , test \'f0\f0\u7847?u phun nh\u7921?a cho \u7893?\f2 n \'f0\f0\u7883?nh.\par
+\par
+\b\fs32 CODE CH\u7880?NH S\u7916?A PHI\'caN B\u7842?N Miracles-1.1.0-RC6:\par
+\b0\fs22 Miracles-1.1.0-RC6-2016.05.10-10.03: Chuy\u7875?\f2 n \'f0\f0\u7893?i code ch\u7881?nh s\u7917?a t\u7915? RC3 qua RC6\par
+Miracles-1.1.0-RC6-2016.05.13-10.50: S\u7917?a Hi\u7875?n th\u7883? cho SSD1306 OLED \par
+\pard\nowidctlpar\li4320 // SSD1306 OLED full graphics generic display\par
+#define U8GLIB_SSD1306_I2C\par
+//#define U8GLIB_SSD1306_SPI\par
+\pard\nowidctlpar\fi4320\par
+\pard\nowidctlpar\fi-4320\li4320 Miracles-1.1.0-RC6-2016.05.13-11.30: S\u7917?\f2 a SSD1306 OLED \'f0\f0\u7875? c\'f3 th\u7875? s\u7917? d\u7909?ng \lang1066\f1\'f0\'fd\lang9\f0\u7907?c ch\u7913?\f2 c n\'e3ng rotary encoder:\par
+\pard\nowidctlpar\li4320\f0   // Generic support for SSD1306 OLED based LCDs.\par
+  #if (ENABLED(U8GLIB_SSD1306_I2C)|| ENABLED(U8GLIB_SSD1306_SPI))\par
+    #define ULTRA_LCD  //general LCD support, also 16x2\par
+    #define DOGLCD  // Support for I2C LCD 128x64 (Controller SSD1306 graphic Display Family)\par
+\cf1\tab //NAMADD\par
+    #define REPRAP_DISCOUNT_SMART_CONTROLLER\tab\par
+\tab //NAMADD END\cf0\par
+  #endif\par
+\par
+\pard\nowidctlpar\fi-4320\li4320 Miracles-1.1.0-RC6-2016.05.10.00: S\u7917?a HOMING_FEEDRATE V\'e0 DEFAULT_MAX_FEEDRATE Cho m\'e1y nh\u7887?\par
+Miracles-1.1.0-RC6-2016.06.21-12.00: Th\'eam SLA_PRINTER\par
+\par
+Miracles-1.1.0-RC6-2016.06.28-14.30: Ch\u7881?nh s\u7917?a giao di\u7879?n m\'e0n h\'ecnh Infor.\par
+\par
+\pard\nowidctlpar\fi-4320\li5040 Th\'eam Bitmap c\'e1c Icon trong file dogm_bitmaps.h\par
+Ch\u7881?nh s\u7917?a hi\u7875?n th\u7883? trong file dogm_lcd_implementation.h\par
+B\u7853?t:\par
+#define TEMP_SENSOR_BED 1\par
+#define HEATER_BED_PIN     10    // BED\par
+#define TEMP_BED_PIN       12   // ANALOG NUMBERING \par
+\par
+\par
+\pard\nowidctlpar\fi-4320\li4320 Miracles-1.1.0-RC6-2016.06.29-11.50: C\'e2n ch\u7881?nh ho\'e0n thi\u7879?n giao di\u7879?n m\'e0n h\'ecnh infor.\par
+Miracles-1.1.0-RC6-2016.07.13-08.33: C\'e2n ch\u7881?nh sub menu v\'e0 Item menu m\'e0n h\'ecnh.\par
+\pard\nowidctlpar\fi-4320\li5040 S\u7917?a file: dogm_bitmaps.h, dogm_lcd_implementation.h, language_en.h, ultralcd.cpp\tab\par
+\par
+\pard\nowidctlpar\fi-4320\li4320 Miracles-1.1.0-RC6-2016.07.21-08.33:\par
+\pard\nowidctlpar\fi-4320\li5040 //MENU_ITEM(submenu, MSG_NO_CARD, lcd_sdcard_menu);\tab\par
+---------------------------\par
+//Ch\u7881?nh s\u7917?a ph\u7847?n preheat\par
+ // #if TEMP_SENSOR_0 != 0\par
+      // MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N1, &target_temperature[0], 0, HEATER_0_MAXTEMP - 15, watch_temp_callback_E0);\par
+    // #endif\par
+    // #if TEMP_SENSOR_1 != 0\par
+      // MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N2, &target_temperature[1], 0, HEATER_1_MAXTEMP - 15, watch_temp_callback_E1);\par
+    // #endif\par
+    // #if EXTRUDERS > 2\par
+      // #if TEMP_SENSOR_2 != 0\par
+        // MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N3, &target_temperature[2], 0, HEATER_2_MAXTEMP - 15, watch_temp_callback_E2);\par
+      // #endif\par
+      // #if EXTRUDERS > 3\par
+        // #if TEMP_SENSOR_3 != 0\par
+          // MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N4, &target_temperature[3], 0, HEATER_3_MAXTEMP - 15, watch_temp_callback_E3);\par
+        // #endif\par
+      // #endif // EXTRUDERS > 3\par
+    // #endif // EXTRUDERS > 2\par
+\par
+-----------------------\par
+    #if (TEMP_SENSOR_1 != 0 && TEMP_SENSOR_2 != 0)\par
+\tab\tab target_temperature[1]=target_temperature[0];\par
+\tab\tab target_temperature[2]=target_temperature[0];\par
+    #endif\par
+\par
+__________________\par
+\par
+\par
+\pard\nowidctlpar\fi-4320\li4320\b Miracles-1.1.0-RC6-2016.07.26-16.00\b0 : code filament load/unload ok.\par
+\par
+Th\'eam v\'e0 Ch\u7881?nh s\u7917?a:\par
+\par
+//NAMADD\par
+// Convert float to string with +1234.5 / -1234.5 format\par
+char* ftostr311(const float& x) \{\par
+  int xx = abs(x * 10);\par
+  conv[0] = (x >= 0) ? '+' : '-';\par
+  conv[1] = (xx / 10000) % 10 + '0';\par
+  conv[2] = (xx / 1000) % 10 + '0';\par
+  conv[3] = (xx / 100) % 10 + '0';\par
+  conv[4] = (xx / 10) % 10 + '0';\par
+  conv[5] = '.';\par
+  conv[6] = xx % 10 + '0';\par
+  conv[7] = 0;\par
+  return conv;\par
+\}\par
+////////////////////////////\par
+lcd_implementation_status_screen_filament_load_unload();\par
+\par
+\par
+//NAMADD\par
+bool load_unload_filament_en=false, load_unload=false;//load_unload=0: unload,=1:load\par
+#if EXTRUDERS > 1\par
+    uint8_t load_unload_filament_ext=0;\par
+#endif\par
+uint32_t counter=0;\par
+static void lcd_filament_load_unload_move_e();\par
+\par
+_______________________________________________\par
+\b Miracles-1.1.0-RC6-2016.07.29-09.20: Th\'eam code ph\u7847?n Galvo trong Planner.cpp\b0\par
+\par
+  #if ENABLED(GALVO_LASER)  //NAMADD\par
+\tab #define CALC_LASER_POWER tail_laser_power\par
+    analogWrite(LASER_PIN, CALC_LASER_POWER);\par
+  #endif  //GALVO_LASER\par
+\par
+_________________________________________\par
+\b Miracles-1.1.0-RC6-2016.08.04-09.00: Th\'eam Code ki\u7875?m tra s\u7907?i nh\u7921?\f2 a cho 3 \'f0\f0\u7847?u phun (a,b,c)\par
+\b0   //NAMADD Font\par
+  u8g.setFont(u8g_font_5x8);\par
+\par
+//NAMADD Filament check\par
+\par
+//NAMADD Filament check test\par
+\par
+//NAMADD Filament check menu\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-2016.08.04-15.00: th\'eam l\u7879?\f2 nh M10 \'f0\f0\u7875? b\u7853?t t\u7855?t Filament check b\u7857?ng Mcode (M010)\par
+\par
+\pard\nowidctlpar\fi-4320\li5040\b0 #define START_ROW              0.2\par
+\par
+\pard\nowidctlpar\fi-4320\li4320 ________________________________\par
+\b Miracles-1.1.0-RC6-2016.08.05-08.00: Ch\u7881?nh s\u7917?a b\u7897?\f2  \'f0\f0\u7871?m th\u7901?i gian cho m\'e1y in khi in SDcard\b0\par
+\pard\nowidctlpar\fi-4320\li5040 //NAMFIX Time\par
+\par
+\pard\nowidctlpar\fi-4320\li4320\b Miracles-1.1.0-RC6-2016.08.15-08.00: Ch\u7881?nh s\u7917?a b\u7897?\f2  \'f0\f0\u7871?m th\u7901?i gian cho m\'e1y in khi in SDcard\b0\par
+\pard\nowidctlpar\fi-4320\li5040 //NAMFIX Time\par
+Khai b\'e1o c\'e1c bi\u7871?n v\'e0 h\'e0m li\'ean quan t\u7899?i th\u7901?i gian th\'e0nh ki\u7875?u d\u7919? li\u7879?u l\u7899?\lang1066\f1 n h\'f5n.\par
+\lang9\f0 uint32_t Stopwatch::duration();\tab\par
+\par
+\pard\nowidctlpar ________________________________\par
+\b Miracles-1.1.0-RC6-2016.09.09-15.00: Ch\u7881?nh s\u7917?\lang1066\f1 a v\'e0 th\'eam code \'f0\lang9\f0\u7875? gi\u7919?\lang1066\f1  b\'e0n in \'f0\lang9\f0\u7913?ng y\'ean (k\'edch ho\u7841?t kh\'f3a c\u7913?ng Z step motor)\par
+\b0\tab   //NAMFIX\par
+ \tab  //#define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the z enabled so your bed stays in place.\par
+  \tab #define SD_FINISHED_RELEASECOMMAND "M84 X Y E" // You might want to keep the z enabled so your bed stays in place.\par
+\par
+_____\par
+\tab //NAMADD Complete state\par
+\tab inline void\tab gcode_M005()\{\tab\tab\tab\tab\tab\tab\tab\par
+\tab\tab complete_state=true;\par
+\tab\}\par
+\par
+_____\par
+\pard\nowidctlpar\li720 //NAMADD\par
+static void lcd_implementation_status_screen_complete_state()\{...\par
+\par
+\pard\nowidctlpar ________________________________\par
+\b Miracles-1.1.0-RC6-2016.09.15-10.00: Ch\u7881?nh s\u7917?a d\'e0nh cho m\'e1y SLA\par
+\b0 T\u7855?t BED. \par
+\pard\nowidctlpar\li720 #define SLA_PRINTER\par
+\par
+\pard\nowidctlpar ________________________________\par
+\b Miracles-1.1.0-RC6-2016.09.19-16.00: Th\'eam m\'e1y Diamond FDM200 Vitme\par
+\pard\nowidctlpar\li720\b0 #define SMALL_FDM_DIAMOND_VITME\par
+\par
+\pard\nowidctlpar ________________________________\par
+\b Miracles-1.1.0-RC6-2016.09.29-16.00: Th\'eam LED_RING\par
+\b0 //NAMADD LED_RING\par
+#define LED_RING\par
+\par
+#if ENABLED(LED_RING)\tab\tab\par
+\tab #define LED_RING_RST_PIN 25\par
+\tab #define LED_RING_CLK_PIN 27\par
+\tab #define LED_RING_LATCH_PIN 33\par
+\tab\par
+\tab #define LED_RING_RED_PIN 28\par
+\tab #define LED_RING_GREEN_PIN 26\par
+\tab #define LED_RING_BLUE_PIN 34\tab\tab\tab\par
+#endif\par
+\par
+  //NAMADD LED_RING\par
+  void led_ring_sw_spi_send(unsigned int pinR,unsigned int pinG,unsigned int pinB,unsigned long valR,unsigned long valG,unsigned long valB);\par
+  void led_ring_init();\par
+\par
+//NAMADD LED_RING\par
+  #if ENABLED(LED_RING)\par
+\tab setup_led_ring();\par
+  #endif\par
+\par
+//NAMADD LED_RING\par
+#if ELAPSED(LED_RING)\par
+\tab bool led_ring_state=false;\par
+\tab unsigned long led_ring_millis;\par
+#endif\par
+\par
+//NAMADD LED_RING\par
+#if ENABLED(LED_RING)\par
+\tab bool led_ring_en=false;\par
+\tab unsigned int led_ring_color=1;\par
+\tab unsigned int led_ring_time=500;\par
+\tab int led_ring_counter=3;\par
+#endif\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-2016.10.11-16.00: S\u7917?a LED_RING\b0\par
+\par
+Th\'eam code nh\'e1y ch\u7853?m khi k\u7871?t th\'fac in.\par
+\par
+M9 P[color] S[time] N[number]\par
+\par
+n\u7871?u: P=0 th\'ec color = black\par
+n\u7871?u S=0 th\'ec N<0 v\'e0 N<5 th\'ec nh\'e1y nhanh f=100\par
+n\u7871?u S !=0, N !=0 nh\'e1y led theo S v\'e0 N\par
+n\u7871?u S !=0 v\'e0 N=0: nh\'e1y ch\u7853?m khi k\u7871?t th\'fac in (Sx100)\par
+\par
+ ________________________________\par
+\b Miracles-1.1.0-RC6-20161024-1600:\par
+\b0 Th\'eam  Filamnet load/unload 200\par
+\par
+//NAMFIX\par
+#define Z_DUAL_STEPPER_DRIVERS\par
+\par
+\par
+ ________________________________\par
+\b Miracles-1.1.0-RC6-20161103-1100:\b0\par
+#ifndef MSG_COMPLETE_DELAY\par
+\tab #define MSG_COMPLETE_DELAY\tab\tab\tab     "G84 S400"\par
+#endif\par
+#ifndef MSG_COMPLETE_VALUE_Z0\par
+\tab #define MSG_COMPLETE_VALUE_Z0\tab\tab\tab\tab "G28 F1000 Z0"\par
+#endif\par
+#ifndef MSG_COMPLETE_VALUE_Z185\par
+\tab #define MSG_COMPLETE_VALUE_Z185\tab\tab\tab\tab "G0 F300 Z185"\par
+#endif\par
+#ifndef MSG_COMPLETE_VALUE_Z270\par
+\tab #define MSG_COMPLETE_VALUE_Z270\tab\tab\tab\tab "G0 F1000 Z270"\par
+#endif\par
+\par
+\par
+\par
+ ________________________________\par
+\b Miracles-1.1.0-RC6-20161104-0900:\par
+\b0\tab\tab\tab else\par
+\tab\tab\tab\tab if(temp_millis>time)\par
+\tab\tab\tab\tab\{\tab\par
+\tab\tab\tab\tab\tab led_ring_millis=millis();\tab\tab\tab\par
+\tab\tab\tab\tab\tab led_ring_counter++;\par
+\tab\tab\tab\tab\tab if (led_ring_counter<=100)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=false;\par
+\tab\tab\tab\tab\tab else if (led_ring_counter<=104)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=true;\par
+\tab\tab\tab\tab\tab else if (led_ring_counter<=108)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=false;\par
+\tab\tab\tab\tab\tab else if (led_ring_counter<=112)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=true;\par
+\tab\tab\tab\tab\tab else if (led_ring_counter<=116)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=false;\par
+\tab\tab\tab\tab\tab else if (led_ring_counter<=120)\par
+\tab\tab\tab\tab\tab\tab led_ring_state=true;\tab\tab\tab\tab\tab\par
+\tab\tab\tab\tab\tab else led_ring_counter=0;\par
+\tab\tab\tab\tab\tab\par
+\tab\tab\tab\tab\}\par
+\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-20161108-1400: Ch\u7881?nh s\u7917?a Z_DUAL_ENDSTOPS cho m\'e1y FDM332227S\par
+\b0 B\u7853?t code:\par
+//NAMFIX\par
+#define USE_XMAX_PLUG\par
+#define USE_YMAX_PLUG\par
+#define USE_ZMAX_PLUG\par
+\par
+S\u7917?a th\'e0nh 1:\par
+//NAMFIX\par
+#if ENABLED(FDM300_SINGLE_COREXY)\par
+\tab #define Z_HOME_DIR 1\par
+#else\par
+\tab #define Z_HOME_DIR -1\par
+#endif\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-20161109-1000: Ch\u7881?nh s\u7917?a Z_DUAL_ENDSTOPS cho m\'e1y FDM332227S\par
+\b0 B\u7853?t code:\par
+//NAMFIX\par
+#define USE_XMAX_PLUG\par
+#define USE_YMAX_PLUG\par
+#define USE_ZMAX_PLUG\par
+\par
+X\'f3a:\par
+//NAMFIX\par
+#if ENABLED(FDM300_SINGLE_COREXY)\par
+\tab #define Z_HOME_DIR 1\par
+#else\par
+\tab #define Z_HOME_DIR -1\par
+#endif\par
+\par
+Th\'eam code: \par
+\tab //NAMADD\tab\par
+    const bool Z2_MIN_ENDSTOP_INVERTING =\par
+      #if Z2_USE_ENDSTOP == _XMAX_\par
+        X_MAX_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN X_MAX_PIN\par
+        #undef USE_XMAX_PLUG\par
+      #elif Z2_USE_ENDSTOP == _YMAX_\par
+        Y_MAX_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN Y_MAX_PIN\par
+        #undef USE_YMAX_PLUG\par
+      #elif Z2_USE_ENDSTOP == _ZMAX_\par
+        Z_MAX_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN Z_MAX_PIN\par
+        #undef USE_ZMAX_PLUG\par
+      #elif Z2_USE_ENDSTOP == _XMIN_\par
+        X_MIN_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN X_MIN_PIN\par
+        #undef USE_XMIN_PLUG\par
+      #elif Z2_USE_ENDSTOP == _YMIN_\par
+        Y_MIN_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN Y_MIN_PIN\par
+        #undef USE_YMIN_PLUG\par
+      #elif Z2_USE_ENDSTOP == _ZMIN_\par
+        Z_MIN_ENDSTOP_INVERTING\par
+        #define Z2_MIN_PIN Z_MIN_PIN\par
+        #undef USE_ZMIN_PLUG\par
+      #else\par
+        0\par
+      #endif\par
+    ;\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-20161118-1000: Ch\u7881?nh s\u7917?a pause \par
+\b0 lcd_sdcard_pause\par
+\par
+\tab   //NAMADD \par
+\tab   enqueue_and_echo_commands_P(PSTR("G0 F3000 X300 Y200"));\par
+\par
+\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-20161122-1000: Ch\u7881?nh s\u7917?a loading v\'e0 unloading \u273?\u7875? t\u432?\u417?ng th\'edch v\u7899?i pause\par
+\b0\par
+//NAMADD\par
+float original_position_e;\par
+unsigned short original_active_extruder;\par
+unsigned short original_feedrate_multiplier;\par
+\par
+\par
+\par
+\tab\tab\tab //NAMADD Save current_position[E_AXIS], active_extruder, feedrate_multiplier;.\par
+\tab\tab\tab current_position[E_AXIS]= original_position_e;\par
+\tab\tab\tab active_extruder= original_active_extruder;\par
+\tab\tab\tab feedrate_multiplier= original_feedrate_multiplier;\par
+\par
+\par
+\tab   #if ENABLED (FDM_COREXY)\par
+\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G0 F3000 X1000 Y1000"));\par
+  \tab   #endif\par
+\par
+\par
+________________________________\par
+\b Miracles-1.1.0-RC6-20161123-1000: Th\'eam v\'e0 ch\u7881?nh s\u7917?a FAN\par
+\par
+\b0 Th\'eam:\par
+#define FAN1_PIN\tab\tab    8\par
+\par
+\tab //NAMADD Fix Fan\par
+\tab if (!IS_SD_PRINTING)\par
+\tab\tab if (degTargetHotend(0)<50)\par
+\tab\tab\tab fanSpeeds[0]=0;\par
+\tab\tab else \par
+\tab\tab\tab fanSpeeds[0]=255;\par
+\par
+________________________________\par
+\b 20161214-1600-Miracles-1.1.0-RC6: S\u7917?a code LED RING cho board LED RING m\u7899?i (thu\u7853?n kim \u273?\u7891?ng h\u7891? v\'e0 \u273?\u7843?o c\u7921?c t\'ednh led)\b0\par
+\par
+________________________________\par
+\b 20170106-1600-Miracles-1.1.0-RC6: Them code led ring cho board led ring v2\par
+\b0\par
+/*\par
+*Support\par
+/*\par
+\par
+*led ring v1, on=0, off=1. led direction = counter-clockwise\par
+*/\par
+//#define LED_RING_LOW_V1\par
+\par
+/*\par
+*led ring v2, on=1, off=0. led direction = clockwise\par
+*/\par
+#define LED_RING_HIGH_V2\par
+\par
+________________________________\par
+\b 20170109-1600-Miracles-1.1.0-RC6:  Ch\u7881?nh s\u7917?a code led ring high v2\par
+\par
+\b0 //NAMADD LED_RING_HIGH_V2\par
+#if ENABLED(LED_RING_HIGH_V2)\par
+\tab void led_ring_high_v2_sw_spi_send(unsigned int pinR,unsigned int pinG,unsigned int pinB,unsigned long valR,unsigned long valG,unsigned long valB) \{\par
+\tab\tab  for (uint8_t i = 16; i >0; i--) \{\par
+\tab\tab    #if F_CPU == 20000000\par
+\tab\tab\tab __asm__("nop\\n\\t");\par
+\tab\tab    #endif\par
+\tab\tab\tab digitalWrite(pinR,(valR>>(i-1))&(0x01));// select each bit of data from high to low\par
+\tab\tab\tab digitalWrite(pinG,(valG>>(i-1))&(0x01));// select each bit of data from high to low\par
+\tab\tab\tab digitalWrite(pinB,(valB>>(i-1))&(0x01));// select each bit of data from high to low    \par
+\tab\tab    \par
+\tab\tab     digitalWrite(LR_CLK_PIN,LOW);\par
+\tab\tab     digitalWrite(LR_CLK_PIN,HIGH);\par
+\tab\tab    \par
+\tab\tab    #if F_CPU == 20000000\par
+\tab\tab    __asm__("nop\\n\\t""nop\\n\\t");\par
+\tab\tab    #endif\par
+\tab\tab\}\par
+\tab\tab\par
+\tab    digitalWrite(LR_LATCH_PIN,LOW);\par
+\tab    digitalWrite(LR_LATCH_PIN,HIGH);\tab\tab\par
+\tab\}\par
+#endif\par
+\par
+L\u7879?nh \u273?i\u7873?u khi\u7875?n led nh\'e1y:\par
+P: Led Color\par
+S: Th\u7901?i gian (\u273?\u417?n v\u7883? ms n\u7871?u N<20, \u273?\u417?n v\u7883? 0.1ms n\u7871?u N>20)\par
+N: S\u7889? l\u7847?n nh\u7845?p nh\'e1y (=0 th\'ec l\u7863?p m\'e3i m\'e3i)\par
+\par
+M9 D1 T20: led_ring_high_v2_shift_one_led(1,20);\par
+M9 H1 T20: led_ring_high_v2_shift_two_led_opposite(1.20);\par
+\par
+______________________________\par
+\b 2017011-1000-Miracles-1.1.0-RC6:  Ch\u7881?nh s\u7917?a code led ring high v2\b0\par
+Ho\'e0n ch\u7881?nh code led ring high v2.\par
+Th\'eam:\par
+filament_load_move_z_en\par
+\par
+______________________________\par
+\b 2017012-1600-Miracles-1.1.0-RC6:  \b0\par
+filament_load_move_z_en\par
+S\u7917?a pause v\'e0 resum v\'e0 stop\par
+\par
+___________________________________\par
+\b 2017013-1000-Miracles-1.1.0-RC6:  S\u7917?a l\u432?u E khi load v\'e0 unload filament\par
+\par
+th\'eam: \line original_en=false;\par
+\par
+\par
+//NAMADD Pause\par
+\tab inline void\tab gcode_M006()\{\par
+\tab\tab if(IS_SD_PRINTING)\{\tab\tab\tab\par
+\tab\tab\tab card.pauseSDPrint();\tab\par
+\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G0 F2000 X0 Y0"));\tab\tab\tab\par
+\tab\tab\tab lcd_setstatus(MSG_PAUSE_PRINT,true);\par
+\tab\tab\}\tab   \tab\par
+\tab\}\tab\par
+\par
+Ch\u7881?nh: #define TEMP_RESIDENCY_TIME 4  // (seconds)\par
+\par
+\b0\par
+___________________________________\par
+\b 20170119-1500-Miracles-1.1.0-RC6:  \u7848?n axis move z khi load, unload\par
+\par
+\b0 ___________________________________\par
+\b 20170217-1030-Miracles-1.1.0-RC6:  Th\'eam set nhi\u7879?t \u273?\u7897? nozzle 250, set nhi\u7879?t \u273?\u7897? bed 50,60\par
+\par
+\par
+\b0 ___________________________________\par
+\b 20170220-1700-Miracles-1.1.0-RC6:  Ch\u7881?nh Fan, \par
+\b0\tab //NAMADD Fix Fan\par
+\tab //if (!IS_SD_PRINTING)\par
+\tab\tab const int POWER_VOLT=12; //volt\par
+\tab\tab const int FAN_VOLT=5.5; //volt\par
+\tab\tab const int FAN_DIGITAL=(255*FAN_VOLT)/POWER_VOLT;\par
+\tab\tab if (degHotend(0)<50)\par
+\tab\tab\tab fanSpeeds[1]=0;\par
+\tab\tab else \par
+\tab\tab\tab fanSpeeds[1]=FAN_DIGITAL;\par
+\par
+\par
+\par
+#define DEFAULT_AXIS_STEPS_PER_UNIT \{80, 80, 400, 85\}   //E 100=>85\par
+#define DEFAULT_ACCELERATION          1000    // X, Y, Z and E acceleration in mm/s^2 for printing moves\tab  \tab\tab (befor 3000)\par
+#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves\tab\tab  (befor 3000)\par
+\par
+\b\par
+\b0 ___________________________________\par
+\b 20170313-1700-Miracles-1.1.0-RC6:  Ch\u7881?nh Fan, ch\u7881?nh M600, M25, thay 3D Miracles th\'e0nh 3D Factory\par
+\par
+if (degHotend(0)<50)\par
+\tab fanSpeeds[1]=0;\par
+else \par
+\tab fanSpeeds[1]=fanValue;\par
+\par
+\par
+\par
+//#define AUTO_FILAMENT_CHANGE \par
+\par
+\par
+  /**\par
+   * M25: Pause SD Print\par
+   */\par
+  inline void gcode_M25() \{\par
+\tab   //NAMFIX\par
+\tab   card.pauseSDPrint();\tab\par
+\tab   enqueue_and_echo_commands_P(PSTR("G0 F2000 X0 Y0"));\tab   \tab\par
+  \}\par
+\par
+\par
+\par
+\b0 ___________________________________\par
+\b 20170322-1700-Miracles-1.1.0-RC6:  Code hi\u7875?n th\u7883? t\'ean file khi in\par
+\b0\par
+  //NAMFIX\par
+\tab #if ENABLED(SDSUPPORT)\par
+\tab\tab if (card.longFilename[0])\par
+\tab\tab\tab if (PENDING(millis(), previous_lcd_status_ms_name_file + 20000UL))\par
+\tab\tab\tab\{\par
+\tab\tab\tab\tab lcd_print(lcd_status_message);\par
+\tab\tab\tab\}\tab\par
+\tab\tab\tab else\par
+\tab\tab\tab\tab lcd_print(card.longFilename);\par
+\tab\tab else lcd_print(lcd_status_message);\par
+\tab #else\par
+\tab\tab lcd_print(lcd_status_message);\par
+\tab #endif\par
+\par
+\par
+\b 20170417-1100-Miracles-1.1.0-RC6:  Code m\'e1y fdm 3 tr\u7909?c z\par
+\par
+20170421-1500-Miracles-1.1.0-RC6:  Code m\'e1y fdm 3 tr\u7909?c z\par
+\par
+\b0 ______________________________________________________________________________\b\par
+20170428-1700-Miracles-1.1.0-RC6:  Code b\u7843?o v\u7879? qu\'e1 nhi\u7879?t, move v\u7873? t\u7885?a \u273?\u7897? theo ng\u432?\u7901?i d\'f9ng. Vi\u7871?t h\'e0m move theo t\u7885?a \u273?\u7897?, di chuy\u7875?n t\u259?ng z. Copy M0 ra M008\par
+\b0 //NAMADD max temp protect\par
+#if ENABLED(MAXTEMP_PROTECT)\tab\par
+\tab bool maxtemp_protect_en=true;\par
+\tab bool maxtemp_protect_status=false;\par
+\tab uint16_t NOZZLE_MAXTEMP_PROTECT=HEATER_0_MAXTEMP-30;\par
+\tab #if HAS_TEMP_BED\par
+\tab\tab uint16_t BED_MAXTEMP_PROTECT=BED_MAXTEMP-5;\par
+\tab #endif\par
+\tab uint16_t X_MAXTEMP_PROTECT=0;\par
+\tab uint16_t Y_MAXTEMP_PROTECT=100;\par
+\tab uint16_t Z_MAXTEMP_PROTECT=10;\tab\par
+#endif\par
+\par
+\par
+\par
+\par
+\tab  //NAMADD move axis\par
+\tab static void _axis_move_position(AxisEnum axis,float distance, float min, float max) \{\par
+\tab\tab refresh_cmd_timeout();\par
+\tab\tab // current_position[axis] = distance - current_position[axis];\par
+\tab\tab // if (min_software_endstops) NOLESS(current_position[axis], min);\par
+\tab\tab // if (max_software_endstops) NOMORE(current_position[axis], max);\par
+\tab\tab // line_to_current(axis);\tab\tab\par
+\tab\tab destination[axis] +=distance; \par
+\tab\tab line_to_destination_namadd(axis);\tab\tab\par
+\tab\tab current_position[axis]=destination[axis];\par
+\tab\tab st_synchronize();\par
+\tab\tab\par
+\tab\}\par
+\par
+\tab //NAMADD MAX TEMP PROTECT\par
+\tab static void axis_move_x_position(float distance) \{_axis_move_position(X_AXIS,distance, sw_endstop_min[X_AXIS], sw_endstop_max[X_AXIS]); \}\par
+\tab static void axis_move_y_position(float distance) \{_axis_move_position(Y_AXIS,distance, sw_endstop_min[Y_AXIS], sw_endstop_max[Y_AXIS]); \}\tab\par
+\tab static void axis_move_z_position(float distance) \{_axis_move_position(Z_AXIS,distance, sw_endstop_min[Z_AXIS], sw_endstop_max[Z_AXIS]); \}\par
+\par
+\par
+\par
+   M008 - Wait for over heat protection\b\par
+\par
+\b0  LCD_MESSAGEPGM(MSG_USERWAIT_OVERHEAT);\b\par
+______________________________________________________________________________\par
+20170503-1000-Miracles-1.1.0-RC6: Nh\u432? tr\'ean\par
+______________________________________________________________________________\par
+20170503-1000-Miracles-1.1.0-RC6: B\u7853?t\par
+Z_MIN_PROBE_ENDSTOP\b0\par
+const bool \b Z_MIN_PROBE_ENDSTOP_INVERTING \b0 = true; // set to true to invert the logic of the endstop.\par
+\par
+\b   //NAMFIX\par
+  #define Z_PROBE_SLED\par
+  #define SLED_DOCKING_OFFSET 5 // The extra distance the X axis must travel to pickup the sled. 0 should be fine but you can push it further if you'd like.\par
+\par
+  // A Mechanical Probe is any probe that either doesn't deploy or needs manual deployment\par
+  // For example any setup that uses the nozzle itself as a probe.\par
+  #define MECHANICAL_PROBE\par
+\par
+  // In the following example the X and Y offsets are both positive:\par
+   #define X_PROBE_OFFSET_FROM_EXTRUDER 10\par
+   #define Y_PROBE_OFFSET_FROM_EXTRUDER 10\par
+\par
+//NAMFIX\par
+#define AUTO_BED_LEVELING_FEATURE\par
+\b0\par
+\b ______________________________________________________________________________\par
+\pard\sl276\slmult1\fs32 20170505-1000-Miracles-1.1.0-RC6: \lang1033\caps\f3 3D PRINTER Overheat protect\fs48\par
+\fs32\par
+Instruction: \par
+\b0\caps0 Insert this command before start Gcode:  M7 N[n] B[b] X[x] Y[y] Z[z].\par
+Infor: \par
+M7: MCODE  (Required if you want to use \b\fs24 MAX TEMP PROTECT\b0\fs32 )\fs24\par
+\fs32 N[n]: Nozzle temperature need protection. (default =\f0\fs22  \f3\fs32 NOZZLE_MAXTEMP_PROTECT, limit: 100 to HEATER_0_MAXTEMP-30  )\par
+B[b]: Bed temperature need protection.  (default =\f0\fs22  \f3\fs32 BED_MAXTEMP_PROTECT, limit: 40 to BED_MAXTEMP-5  )\par
+X[x]: X axis  coordinates will move. (default =0).\par
+Y[y]: Y axis  coordinates will move. (default =0).\par
+Z[z]:  Z axis  lift . (default =1).\b\par
+\par
+SOURCE CODE:\par
+Configuration.h:\par
+\pard\li720\sl276\slmult1\b0\fs24 //NAMADD MAX TEMP PROTECT\par
+#define MAXTEMP_PROTECT\par
+\pard\sl276\slmult1\par
+\b\fs32 Ultralcd.cpp\par
+\pard\fi720\sl276\slmult1\b0\fs24  //NAMADD MAX TEMP PROTECT\par
+\pard\li720\sl276\slmult1   #if ENABLED(MAXTEMP_PROTECT)\par
+ \par
+if ((maxtemp_protect_en)&&(current_temperature[0]>=NOZZLE_MAXTEMP_PROTECT)||(current_temperature_bed >= BED_MAXTEMP_PROTECT))\tab\tab\par
+\tab\{\par
+\tab\tab maxtemp_protect_en=false;\par
+\tab\tab maxtemp_protect_status=true;\par
+\tab\tab disable_all_heaters();\tab\tab\tab\tab\par
+\tab\tab enqueue_and_echo_commands_P(PSTR("M8 X Y Z"));\tab\tab\tab\par
+\tab\}\par
+\tab\tab\par
+\tab if (!maxtemp_protect_en&&((current_temperature[0]<=NOZZLE_MAXTEMP_PROTECT-10)&&(current_temperature_bed <= BED_MAXTEMP_PROTECT-5))) \par
+\tab\{\par
+\tab\tab maxtemp_protect_en=true;\par
+\tab\tab maxtemp_protect_status=false;\par
+\tab\tab lcd_setstatus("Overheat protect ok.");\par
+\tab\tab\par
+\tab\}else if (maxtemp_protect_status) enqueue_and_echo_commands_P(PSTR("M8"));\tab\tab\par
+  #endif\par
+\par
+\pard\sl276\slmult1\b\fs32 Marlin.h\par
+\pard\li720\sl276\slmult1\b0\fs24\par
+//NAMADD max temp protect\par
+#if ENABLED(MAXTEMP_PROTECT)\par
+\tab extern bool maxtemp_protect_en;\par
+\tab extern bool maxtemp_protect_status;\par
+\tab extern uint16_t NOZZLE_MAXTEMP_PROTECT;\par
+\tab #if HAS_TEMP_BED\par
+\tab\tab extern uint16_t BED_MAXTEMP_PROTECT;\par
+\tab #endif\par
+\tab extern uint16_t X_MAXTEMP_PROTECT;\par
+\tab extern uint16_t Y_MAXTEMP_PROTECT;\par
+\tab extern uint16_t Z_MAXTEMP_PROTECT;\par
+#endif\par
+\par
+\par
+\pard\sl276\slmult1\b\fs32 Marlin_main.cpp\par
+\b0\fs24 /*\par
+   M007 - Pause for max temp protect machine\par
+   M008 - Wait for over heat protection\par
+*/\par
+//NAMADD max temp protect\par
+#if ENABLED(MAXTEMP_PROTECT)\tab\par
+\tab bool maxtemp_protect_en=true;\par
+\tab bool maxtemp_protect_status=false;\par
+\tab uint16_t NOZZLE_MAXTEMP_PROTECT=HEATER_0_MAXTEMP-30;\par
+\tab #if HAS_TEMP_BED\par
+\tab\tab uint16_t BED_MAXTEMP_PROTECT=BED_MAXTEMP-5;\par
+\tab #endif\par
+\tab uint16_t X_MAXTEMP_PROTECT=0;\par
+\tab uint16_t Y_MAXTEMP_PROTECT=0;\par
+\tab uint16_t Z_MAXTEMP_PROTECT=1;\tab\par
+#endif\par
+\pard\brdrb\brdrs\brdrw30\brsp20 \sl276\slmult1\par
+\pard\sl276\slmult1 //NAMADD MAXTEMP_PROTECT\par
+#if ENABLED(MAXTEMP_PROTECT)\par
+\tab inline void gcode_M007()\{\par
+\tab\tab NOZZLE_MAXTEMP_PROTECT=code_seen('N')?constrain(code_value_short(),100,HEATER_0_MAXTEMP-30):NOZZLE_MAXTEMP_PROTECT;\par
+\tab\tab #if HAS_TEMP_BED\par
+\tab\tab\tab BED_MAXTEMP_PROTECT=code_seen('B')?constrain(code_value_short(),40,BED_MAXTEMP-5):BED_MAXTEMP_PROTECT;\par
+\tab\tab #endif\par
+\tab\tab X_MAXTEMP_PROTECT=code_seen('X')?code_value_short():X_MAXTEMP_PROTECT;\par
+\tab\tab Y_MAXTEMP_PROTECT=code_seen('Y')?code_value_short():Y_MAXTEMP_PROTECT;\par
+\tab\tab Z_MAXTEMP_PROTECT=code_seen('Z')?code_value_short():Z_MAXTEMP_PROTECT;\tab\tab\tab\par
+\tab\}\par
+\par
+\tab #if ENABLED(ULTIPANEL)\par
+\tab //NAMADD\par
+\tab   inline void gcode_M008() \{ //sem sem M0_M1\par
+\par
+\tab\tab //NAMADD\tab   \par
+\tab\tab //lift Z\par
+\tab\tab if (code_seen('Z')) destination[Z_AXIS] += Z_MAXTEMP_PROTECT;\par
+\tab\tab RUNPLAN;\par
+\tab\tab //move xy\par
+\tab\tab if (code_seen('X')) destination[X_AXIS] = X_MAXTEMP_PROTECT;\par
+\tab\tab if (code_seen('Y')) destination[Y_AXIS] = Y_MAXTEMP_PROTECT;\par
+\tab\tab RUNPLAN;\tab   \par
+\tab   \par
+\tab  \tab   \par
+\tab\tab char* args = current_command_args;\par
+\par
+\tab\tab //uint8_t test_value = 12;\par
+\tab\tab //SERIAL_ECHOPAIR("TEST", test_value);\par
+\par
+\tab\tab millis_t codenum = 0;\par
+\tab\tab bool hasP = false, hasS = false;\par
+\tab\tab if (code_seen('P')) \{\par
+\tab\tab   codenum = code_value_short(); // milliseconds to wait\par
+\tab\tab   hasP = codenum > 0;\par
+\tab\tab\}\par
+\tab\tab if (code_seen('S')) \{\par
+\tab\tab   codenum = code_value() * 1000UL; // seconds to wait\par
+\tab\tab   hasS = codenum > 0;\par
+\tab\tab\}\par
+\tab\tab\par
+\tab\tab //if (!hasP && !hasS && *args != '\\0')\par
+\tab\tab //  lcd_setstatus(args, true);\par
+\tab\tab //else \{\par
+\tab\tab   LCD_MESSAGEPGM(MSG_USERWAIT_OVERHEAT);\par
+\tab\tab   #if ENABLED(LCD_PROGRESS_BAR) && PROGRESS_MSG_EXPIRE > 0\par
+\tab\tab\tab dontExpireStatus();\par
+\tab\tab   #endif\par
+\tab\tab //\}\par
+\par
+\tab\tab lcd_ignore_click();\par
+\tab\tab st_synchronize();\par
+\tab\tab refresh_cmd_timeout();\par
+\tab\tab if (codenum > 0) \{\par
+\tab\tab   codenum += previous_cmd_ms;  // wait until this time for a click\par
+\tab\tab   KEEPALIVE_STATE(PAUSED_FOR_OVERHEAT);\par
+\tab\tab   while (PENDING(millis(), codenum) && !lcd_clicked()) idle();\par
+\tab\tab   KEEPALIVE_STATE(IN_HANDLER);\par
+\tab\tab   lcd_ignore_click(false);\par
+\tab\tab\}\par
+\tab\tab else \{\par
+\tab\tab   if (!lcd_detected()) return;\par
+\tab\tab   KEEPALIVE_STATE(PAUSED_FOR_OVERHEAT);\par
+\tab\tab   while (!lcd_clicked()) idle();\par
+\tab\tab   KEEPALIVE_STATE(IN_HANDLER);\par
+\tab\tab\}\par
+\tab\tab if (IS_SD_PRINTING)\par
+\tab\tab   LCD_MESSAGEPGM(MSG_RESUMING);\par
+\tab\tab else\par
+\tab\tab   LCD_MESSAGEPGM(WELCOME_MSG);\tab  \par
+\tab   \}\par
+    #endif //end ULTIPANEL\tab\par
+#endif\tab\par
+\pard\brdrb\brdrs\brdrw30\brsp20 \sl276\slmult1\par
+\pard\sl276\slmult1 case 'M': switch (codenum) \{\par
+\tab   #if ENABLED(MAXTEMP_PROTECT)\par
+\tab   case 7:\par
+\tab\tab gcode_M007();\par
+\tab   break;\par
+\tab   case 8:\par
+\tab\tab #if ENABLED(ULTIPANEL)\tab  \par
+\tab\tab\tab gcode_M008();\par
+\tab\tab\tab break;\par
+\tab\tab #endif\par
+\tab   #endif\par
+\pard\brdrb\brdrs\brdrw30\brsp20 \sl276\slmult1     break;\par
+\pard\sl276\slmult1 #if ENABLED(HOST_KEEPALIVE_FEATURE)\par
+\par
+  // States for managing Marlin and host communication\par
+  // Marlin sends messages if blocked or busy\par
+  enum MarlinBusyState \{\par
+    NOT_BUSY,           // Not in a handler\par
+    IN_HANDLER,         // Processing a GCode\par
+    IN_PROCESS,         // Known to be blocking command input (as in G29)\par
+    PAUSED_FOR_USER,    // Blocking pending any input\par
+\tab PAUSED_FOR_OVERHEAT,\par
+    PAUSED_FOR_INPUT    // Blocking pending text input (concept)\par
+\tab\par
+  \};\par
+\par
+  static MarlinBusyState busy_state = NOT_BUSY;\par
+  static millis_t next_busy_signal_ms = 0;\par
+  uint8_t host_keepalive_interval = DEFAULT_KEEPALIVE_INTERVAL;\par
+  #define KEEPALIVE_STATE(n) do\{ busy_state = n; \}while(0)\par
+#else\par
+  #define host_keepalive() ;\par
+  #define KEEPALIVE_STATE(n) ;\par
+#endif // HOST_KEEPALIVE_FEATURE \par
+______________________________________________\par
+#if ENABLED(HOST_KEEPALIVE_FEATURE)\par
+\par
+  /**\par
+   * Output a "busy" message at regular intervals\par
+   * while the machine is not accepting commands.\par
+   */\par
+  void host_keepalive() \{\par
+    millis_t ms = millis();\par
+    if (host_keepalive_interval && busy_state != NOT_BUSY) \{\par
+      if (PENDING(ms, next_busy_signal_ms)) return;\par
+      switch (busy_state) \{\par
+        case IN_HANDLER:\par
+        case IN_PROCESS:\par
+          SERIAL_ECHO_START;\par
+          SERIAL_ECHOLNPGM(MSG_BUSY_PROCESSING);\par
+          break;\par
+        case PAUSED_FOR_USER:\par
+          SERIAL_ECHO_START;\par
+          SERIAL_ECHOLNPGM(MSG_BUSY_PAUSED_FOR_USER);\par
+          break;\par
+        case PAUSED_FOR_OVERHEAT:\par
+          SERIAL_ECHO_START;\par
+          SERIAL_ECHOLNPGM(MSG_BUSY_PAUSED_FOR_OVERHEAT);\par
+          break;\tab\tab   \tab\tab   \par
+        case PAUSED_FOR_INPUT:\par
+          SERIAL_ECHO_START;\par
+          SERIAL_ECHOLNPGM(MSG_BUSY_PAUSED_FOR_INPUT);\par
+          break;\par
+        default:\par
+          break;\par
+      \}\par
+    \}\par
+    next_busy_signal_ms = ms + host_keepalive_interval * 1000UL;\par
+  \}\par
+\par
+#endif //HOST_KEEPALIVE_FEATURE\par
+\par
+\b\fs32 language.h\par
+\b0\fs24 #define MSG_BUSY_PAUSED_FOR_OVERHEAT        "busy: paused for overheat"\par
+\par
+\b\fs32 language_en.h\par
+\b0\fs24 #ifndef MSG_USERWAIT_OVERHEAT\par
+  #define MSG_USERWAIT_OVERHEAT               "Wait maxtemp down."\par
+#endif\par
+\par
+\pard\nowidctlpar\lang9\f0\fs22\par
+\b ______________________________________________________________________________\par
+\fs32 20170509-1200-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_TRIAD (3 Tr\u7909?c Z)\par
+\pard\sl276\slmult1\b0\caps0\fs24\par
+\b\u272?\u7897?ng c\u417? kh\'f4ng ch\u7845?p h\'e0nh khi Z3_MIN_ENSTOP triger l\'e0 v\'ec bi\u7871?n trong n\'e0y.\par
+\par
+enum EndstopEnum \{X_MIN = 0, Y_MIN = 1, Z_MIN = 2, Z_MIN_PROBE = 3, X_MAX = 4, Y_MAX = 5, Z_MAX = 6, Z2_MIN = 7, Z2_MAX = 8, Z3_MIN=4, Z3_MAX=5\};\par
+\b0\par
+\pard\nowidctlpar\lang9\b\f0\fs22 ______________________________________________________________________________\par
+\pard\sl276\slmult1\fs32 20170510-1400-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_TRIAD (3 Tr\u7909?c Z)\b0\caps0\fs24\par
+\par
+//NAMADD Z TRIAD\par
+#if ENABLED(Z_TRIAD_ENDSTOPS)\par
+  static bool performing_homing = false,\par
+              locked_z_motor = false,\par
+              locked_z2_motor = false,\par
+\tab\tab\tab   locked_z3_motor = false;\par
+  bool bed_level_point_a=false,bed_level_point_b=false,bed_level_point_c=false;\par
+#endif\par
+___________\par
+/*\par
+*FDM_Z_TRIAD\par
+*\par
+*/\par
+#if ENABLED(FDM_Z_TRIAD)\par
+\tab\par
+\tab inline void gcode_M011()\{\par
+\tab\tab\par
+\tab\}\par
+\tab\par
+\tab inline void gcode_M012()\{\par
+\tab\tab // Wait for planner moves to finish!\par
+\tab\tab st_synchronize();\par
+\tab\tab if (code_seen('P'))\tab\tab\tab\tab\par
+\tab\tab\tab switch (code_value_short())\par
+\tab\tab\tab\{\par
+\tab\tab\tab\tab // case 0:\par
+\tab\tab\tab\tab // bed_level_point_a=false;\par
+\tab\tab\tab\tab // bed_level_point_b=false;\par
+\tab\tab\tab\tab // bed_level_point_c=false;\par
+\tab\tab\tab\tab // break;\par
+\tab\tab\tab\tab case 1:\par
+\tab\tab\tab\tab bed_level_point_a=true;\par
+\tab\tab\tab\tab bed_level_point_b=false;\par
+\tab\tab\tab\tab bed_level_point_c=false;\par
+\tab\tab\tab\tab //move xy to Z\par
+\tab\tab\tab\tab destination[X_AXIS] = ((X_MIN_POS + X_MAX_POS) / 2);\par
+\tab\tab\tab\tab destination[Y_AXIS] = Y_MIN_POS;\par
+\tab\tab\tab\tab RUNPLAN;\par
+\tab\tab\tab\tab\par
+\tab\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G28 Z0"));\par
+\tab\tab\tab\tab break;\par
+\tab\tab\tab\tab case 2:\tab\par
+\tab\tab\tab\tab bed_level_point_a=false;\par
+\tab\tab\tab\tab bed_level_point_b=true;\par
+\tab\tab\tab\tab bed_level_point_c=false;\par
+\tab\tab\tab\tab //move xy to Z2\par
+\tab\tab\tab\tab destination[X_AXIS] = (X_MIN_POS + X_MAX_POS);\par
+\tab\tab\tab\tab destination[Y_AXIS] = (Y_MIN_POS + Y_MAX_POS);\par
+\tab\tab\tab\tab RUNPLAN;\par
+\tab\tab\tab\tab\par
+\tab\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G28 Z0"));\par
+\tab\tab\tab\tab break;\par
+\tab\tab\tab\tab case 3:\par
+\tab\tab\tab\tab bed_level_point_a=false;\par
+\tab\tab\tab\tab bed_level_point_b=false;\par
+\tab\tab\tab\tab bed_level_point_c=true;\par
+\tab\tab\tab\tab //move xy to Z3\par
+\tab\tab\tab\tab destination[X_AXIS] =  X_MIN_POS;\par
+\tab\tab\tab\tab destination[Y_AXIS] = (Y_MIN_POS + Y_MAX_POS);\par
+\tab\tab\tab\tab RUNPLAN;\par
+\tab\tab\tab\tab\par
+\tab\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G28 Z0"));\par
+\tab\tab\tab\tab break;\par
+\tab\tab\tab\tab\par
+\tab\tab\tab\tab default:\par
+\tab\tab\tab\tab bed_level_point_a=false;\par
+\tab\tab\tab\tab bed_level_point_b=false;\par
+\tab\tab\tab\tab bed_level_point_c=false;\par
+\par
+\tab\tab\tab\tab if (code_seen('Z')) destination[Z_AXIS] += code_value();\par
+\tab\tab\tab\tab RUNPLAN;\par
+\tab\tab\tab\tab //move xy to center\par
+\tab\tab\tab\tab destination[X_AXIS] = ((X_MIN_POS + X_MAX_POS) / 2);\par
+\tab\tab\tab\tab destination[Y_AXIS] = ((Y_MIN_POS + Y_MAX_POS) / 2);\par
+\tab\tab\tab\tab RUNPLAN;\par
+\tab\tab\tab\par
+\tab\tab\tab\tab enqueue_and_echo_commands_P(PSTR("G28 Z0"));\par
+\tab\tab\tab\tab break;\par
+\tab\tab\tab\}\par
+\tab\}\tab\par
+\pard\sa200\sl276\slmult1 #endif\tab\par
+\pard\nowidctlpar\lang9\f0\fs22 _______________\par
+  #if ENABLED(Z_TRIAD_ENDSTOPS)\par
+    #define Z_APPLY_STEP(v,Q) \\\par
+    if (performing_homing) \{ \\\par
+      if (Z_HOME_DIR > 0) \{\\\par
+        if (!(TEST(old_endstop_bits, Z_MAX) && (count_direction[Z_AXIS] > 0)) && !locked_z_motor) Z_STEP_WRITE(v); \\\par
+        if (!(TEST(old_endstop_bits, Z2_MAX) && (count_direction[Z_AXIS] > 0)) && !locked_z2_motor) Z2_STEP_WRITE(v); \\\par
+        if (!(TEST(old_endstop_bits, Z3_MAX) && (count_direction[Z_AXIS] > 0)) && !locked_z3_motor) Z3_STEP_WRITE(v); \\\par
+\tab\tab\} \\\par
+      else \{ \\\par
+\tab\tab if (bed_level_point_a)\\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z_motor) Z_STEP_WRITE(v); \\\par
+\tab\tab if (bed_level_point_b)\\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z2_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z2_motor) Z2_STEP_WRITE(v); \\\par
+\tab\tab if (bed_level_point_c)\\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z3_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z3_motor) Z3_STEP_WRITE(v); \\\par
+\tab\tab if (!bed_level_point_a && !bed_level_point_b && !bed_level_point_c) \{ \\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z_motor) Z_STEP_WRITE(v); \\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z2_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z2_motor) Z2_STEP_WRITE(v); \\\par
+\tab\tab\tab if (!(TEST(old_endstop_bits, Z3_MIN) && (count_direction[Z_AXIS] < 0)) && !locked_z3_motor) Z3_STEP_WRITE(v); \\\par
+\tab\tab\} \\\par
+\tab   \}\\\par
+\tab\} \\\par
+    else \{ \\\par
+      Z_STEP_WRITE(v); \\\par
+      Z2_STEP_WRITE(v); \\\par
+\tab   Z3_STEP_WRITE(v); \\\par
+    \}\par
+  #else\par
+    #define Z_APPLY_STEP(v,Q) \{ Z_STEP_WRITE(v); Z2_STEP_WRITE(v); Z3_STEP_WRITE(v); \}\par
+  #endif\par
+\fs36\par
+\b\fs22 ______________________________________________________________________________\par
+\fs32 20170512-1400-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_TRIAD (3 Tr\u7909?c Z)\lang9\b0\caps0\f0\fs22\par
+\par
+    const bool Z_TRIAD_PROBE_ENDSTOP_INVERTING =\par
+      #if Z_TRIAD_PROBE_USE_ENDSTOP == _XMAX_\par
+        X_MAX_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN X_MAX_PIN\par
+        #undef USE_XMAX_PLUG\par
+      #elif Z_TRIAD_PROBE_USE_ENDSTOP == _YMAX_\par
+        Y_MAX_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN Y_MAX_PIN\par
+        #undef USE_YMAX_PLUG\par
+      #elif Z_TRIAD_PROBE_USE_ENDSTOP == _ZMAX_\par
+        Z_MAX_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN Z_MAX_PIN\par
+        #undef USE_ZMAX_PLUG\par
+      #elif Z_TRIAD_PROBE_USE_ENDSTOP == _XMIN_\par
+        X_MIN_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN X_MIN_PIN\par
+        #undef USE_XMIN_PLUG\par
+      #elif Z_TRIAD_PROBE_USE_ENDSTOP == _YMIN_\par
+        Y_MIN_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN Y_MIN_PIN\par
+        #undef USE_YMIN_PLUG\par
+      #elif Z_TRIAD_PROBE_USE_ENDSTOP == _ZMIN_\par
+        Z_MIN_ENDSTOP_INVERTING\par
+        #define Z_TRIAD_PROBE_PIN Z_MIN_PIN\par
+        #undef USE_ZMIN_PLUG\par
+      #else\par
+        0\par
+      #endif\par
+    ;\par
+\par
+\b ______________________________________________________________________________\par
+\fs32 20170605-1000-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_TRIAD (3 Tr\u7909?c Z)\lang9\b0\caps0\f0\fs22\par
+\par
+\u7848?n l\u7879?nh: \u273?\u7875? kh\'f4ng b\u7883? h\u7891?i l\u7841?i n\u7871?u ch\u7841?m endstop khi v\u7873? home cho tr\u7909?c z.\par
+/*\par
+    // Move away from the endstop by the axis HOME_BUMP_MM // NAMFIX\par
+    destination[axis] = -home_bump_mm(axis) * axis_home_dir;\par
+    line_to_destination();\par
+    st_synchronize();\par
+*/\par
+\par
+\par
+\par
+\b ______________________________________________________________________________\b0\par
+\b\fs32 20170913-1700-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_DUAL \par
+\par
+\b0\f4\fs22 // @section bedlevel\par
+//NAMFIX\par
+#define AUTO_BED_LEVELING_FEATURE // Delete the comment to enable (remove // at the start of the line)\par
+#define DEBUG_LEVELING_FEATURE\par
+#define Z_MIN_PROBE_REPEATABILITY_TEST  // If not commented out, Z Probe Repeatability test will be included if Auto Bed Leveling is Enabled.\par
+\par
+#if ENABLED(AUTO_BED_LEVELING_FEATURE)\par
+\par
+  // There are 2 different ways to specify probing locations:\par
+  //\par
+  // - "grid" mode\par
+  //   Probe several points in a rectangular grid.\par
+  //   You specify the rectangle and the density of sample points.\par
+  //   This mode is preferred because there are more measurements.\par
+  //\par
+  // - "3-point" mode\par
+  //   Probe 3 arbitrary points on the bed (that aren't collinear)\par
+  //   You specify the XY coordinates of all 3 points.\par
+\par
+  // Enable this to sample the bed in a grid (least squares solution).\par
+  // Note: this feature generates 10KB extra code size.\par
+  #define AUTO_BED_LEVELING_GRID\par
+\par
+  #if ENABLED(AUTO_BED_LEVELING_GRID)\par
+\par
+    // #define LEFT_PROBE_BED_POSITION 15\par
+    // #define RIGHT_PROBE_BED_POSITION 170\par
+    // #define FRONT_PROBE_BED_POSITION 40\par
+    // #define BACK_PROBE_BED_POSITION 170\par
+\tab\par
+    #define LEFT_PROBE_BED_POSITION 100\par
+    #define RIGHT_PROBE_BED_POSITION 250\par
+    #define FRONT_PROBE_BED_POSITION 90\par
+    #define BACK_PROBE_BED_POSITION 200\tab\par
+\par
+    #define MIN_PROBE_EDGE 10 // The Z probe minimum square sides can be no smaller than this.\par
+\par
+    // Set the number of grid points per dimension.\par
+    // You probably don't need more than 3 (squared=9).\par
+    #define AUTO_BED_LEVELING_GRID_POINTS 2\par
+\par
+  #else  // !AUTO_BED_LEVELING_GRID\par
+\par
+    // Arbitrary points to probe.\par
+    // A simple cross-product is used to estimate the plane of the bed.\par
+    // #define ABL_PROBE_PT_1_X 15\par
+    // #define ABL_PROBE_PT_1_Y 180\par
+    // #define ABL_PROBE_PT_2_X 15\par
+    // #define ABL_PROBE_PT_2_Y 20\par
+    // #define ABL_PROBE_PT_3_X 170\par
+    // #define ABL_PROBE_PT_3_Y 20\par
+    #define ABL_PROBE_PT_1_X 30\par
+    #define ABL_PROBE_PT_1_Y 180\par
+    #define ABL_PROBE_PT_2_X 30\par
+    #define ABL_PROBE_PT_2_Y 20\par
+    #define ABL_PROBE_PT_3_X 250\par
+    #define ABL_PROBE_PT_3_Y 20\tab\par
+\tab\par
+\par
+  #endif // AUTO_BED_LEVELING_GRID\par
+\par
+  // Z Probe to nozzle (X,Y) offset, relative to (0, 0).\par
+  // X and Y offsets must be integers.\par
+  //\par
+  //NAMFIX\par
+  // In the following example the X and Y offsets are both positive:\par
+   // #define X_PROBE_OFFSET_FROM_EXTRUDER 10\par
+   // #define Y_PROBE_OFFSET_FROM_EXTRUDER 10\par
+  //\par
+  //    +-- BACK ---+\par
+  //    |           |\par
+  //  L |    (+) P  | R <-- probe (20,20)\par
+  //  E |           | I\par
+  //  F | (-) N (+) | G <-- nozzle (10,10)\par
+  //  T |           | H\par
+  //    |    (-)    | T\par
+  //    |           |\par
+  //    O-- FRONT --+\par
+  //  (0,0)\par
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]\par
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 30  // Y offset: -front +behind [the nozzle]\par
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]\par
+\par
+  //#define XY_TRAVEL_SPEED 3000         // X and Y axis travel speed between probes, in mm/min.\par
+  #define XY_TRAVEL_SPEED 5000       //NAMFIX  // X and Y axis travel speed between probes, in mm/min.\par
+\par
+  #define Z_RAISE_BEFORE_PROBING 20   // How much the Z axis will be raised before traveling to the first probing point.\par
+  #define Z_RAISE_BETWEEN_PROBINGS 20  // How much the Z axis will be raised when traveling from between next probing points.\par
+  #define Z_RAISE_AFTER_PROBING 20    // How much the Z axis will be raised after the last probing point.\par
+\par
+  //#define Z_PROBE_END_SCRIPT "G1 Z10 F12000\\nG1 X15 Y330\\nG1 Z0.5\\nG1 Z10" // These commands will be executed in the end of G29 routine.\par
+                                                                             // Useful to retract a deployable Z probe.\par
+\par
+  // Probes are sensors/switches that need to be activated before they can be used\par
+  // and deactivated after their use.\par
+  // Allen Key Probes, Servo Probes, Z-Sled Probes, FIX_MOUNTED_PROBE, ... . You have to activate one of these for the AUTO_BED_LEVELING_FEATURE\par
+\par
+  // A fix mounted probe, like the normal inductive probe, must be deactivated to go below Z_PROBE_OFFSET_FROM_EXTRUDER\par
+  // when the hardware endstops are active.\par
+  #define FIX_MOUNTED_PROBE\par
+\par
+  // A Servo Probe can be defined in the servo section below.\par
+\par
+  // An Allen Key Probe is currently predefined only in the delta example configurations.\par
+\par
+  // Enable if you have a Z probe mounted on a sled like those designed by Charles Bell.\par
+  //NAMFIX\par
+  //#define Z_PROBE_SLED\par
+////  #define SLED_DOCKING_OFFSET 5 // The extra distance the X axis must travel to pickup the sled. 0 should be fine but you can push it further if you'd like.\par
+\par
+  // A Mechanical Probe is any probe that either doesn't deploy or needs manual deployment\par
+  // For example any setup that uses the nozzle itself as a probe.\par
+////  #define MECHANICAL_PROBE\par
+\par
+  // If you've enabled AUTO_BED_LEVELING_FEATURE and are using the Z Probe for Z Homing,\par
+  // it is highly recommended you also enable Z_SAFE_HOMING below!\par
+\par
+#endif // AUTO_BED_LEVELING_FEATURE\f3\fs32\par
+\b\par
+\lang9\b0\caps0\f0\fs22 ______________________________________________________________\par
+#if ENABLED(REVERSE_MENU_DIRECTION)\par
+  int8_t encoderDirection = 1;\par
+  \par
+  //NAMFIX\par
+  //#define ENCODER_DIRECTION_NORMAL() (encoderDirection = 1)\par
+  //#define ENCODER_DIRECTION_MENUS() (encoderDirection = -1)\par
+  #define ENCODER_DIRECTION_NORMAL() (encoderDirection = -1)\par
+  #define ENCODER_DIRECTION_MENUS() (encoderDirection = 1)  \par
+#else\par
+  #define ENCODER_DIRECTION_NORMAL() ;\par
+  #define ENCODER_DIRECTION_MENUS() ;\par
+#endif\par
+\par
+_________________________________________________________________________________________\par
+_________________________________________________________________________________________\par
+\b\fs32 20170914-1700-Miracles-1.1.0-RC6: \lang1033\caps\f3 Code FDM_Z_DUAL \lang9\b0\caps0\f0\fs22\par
+  //NAMFIX\par
+  // #if ENABLED(Z_DUAL_STEPPER_DRIVERS)\par
+    // #error EXTRUDERS must be 1 with Z_DUAL_STEPPER_DRIVERS.\par
+  // #endif\par
+\fs36 ________________________________________\par
+\fs22     #if HAS_FAN2\par
+\tab //NAMFIX LIGHT ROOM\tab\par
+      //MENU_MULTIPLIER_ITEM_EDIT(int3, MSG_FAN_SPEED " 3", &fanSpeeds[2], 0, 255);\par
+      MENU_MULTIPLIER_ITEM_EDIT(int3, MSG_LIGHT_ROOM, &fanSpeeds[2], 0, 255);\par
+    #endif\par
+\par
+\par
+_________________________________________________________________________________________\par
+_________________________________________________________________________________________\par
+\b\fs32 20170927-1000-Miracles-1.1.0-RC6: \lang1033\caps\f3 Laser Module\par
+\par
+\lang9\b0\caps0\f0\fs22\par
+\fs36\par
+\b\fs44 ======> Code s\u7869? s\u7917?a s\u7855?p t\u7899?i:\fs28\par
+\par
+\b0\fs22\par
+\par
+}
+ 
